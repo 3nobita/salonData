@@ -1,0 +1,94 @@
+<!-- views/userdata.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Data</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>All Users</h1>
+
+    <% if (users && users.length > 0) { %>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Number</th>
+                    <th>Date of Birth</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(user => { %>
+                    <tr id="user-<%= user.id %>">
+                        <td class="username"><%= user.username %></td>
+                        <td class="number"><%= user.number %></td>
+                        <td class="dob"><%= user.dob %></td>
+                        <td>
+                            <!-- Edit button -->
+                            <button class="edit-btn" data-id="<%= user.id %>">Edit</button>
+                            <!-- Save button (hidden initially) -->
+                            <button class="save-btn" data-id="<%= user.id %>" style="display:none;">Save</button>
+                            <!-- Delete button -->
+                            <form action="/deleteuser/<%= user.id %>" method="POST" style="display:inline;">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No users found!</p>
+    <% } %>
+
+    <br>
+    <a href="/">Go back to the form</a>
+
+    <script>
+        // Handle the "Edit" button click
+        $('.edit-btn').click(function() {
+            const userId = $(this).data('id');
+            const row = $('#user-' + userId);
+            row.find('.username').html('<input type="text" value="' + row.find('.username').text() + '" />');
+            row.find('.number').html('<input type="text" value="' + row.find('.number').text() + '" />');
+            row.find('.dob').html('<input type="date" value="' + row.find('.dob').text() + '" />');
+            row.find('.edit-btn').hide();
+            row.find('.save-btn').show();
+        });
+
+        // Handle the "Save" button click (AJAX request to update the user)
+        $('.save-btn').click(function() {
+            const userId = $(this).data('id');
+            const row = $('#user-' + userId);
+            const updatedUsername = row.find('.username input').val();
+            const updatedNumber = row.find('.number input').val();
+            const updatedDob = row.find('.dob input').val();
+
+            // Send the updated data via AJAX to the server
+            $.ajax({
+                url: '/edituser/' + userId,
+                method: 'POST',
+                data: {
+                    username: updatedUsername,
+                    number: updatedNumber,
+                    dob: updatedDob
+                },
+                success: function(response) {
+                    // On success, update the table row with the new data
+                    row.find('.username').text(updatedUsername);
+                    row.find('.number').text(updatedNumber);
+                    row.find('.dob').text(updatedDob);
+                    row.find('.edit-btn').show();
+                    row.find('.save-btn').hide();
+                },
+                error: function() {
+                    alert('Error updating user.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!-- views/index.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node.js with SQL</title>
+</head>
+<body>
+    <h1><%= message %></h1>
+
+    <!-- Form to collect user input -->
+    <form action="/adduser" method="POST">
+        <label for="username">Name:</label>
+        <input type="text" id="username" name="username" ><br><br>
+        
+        <label for="number">Number:</label>
+        <input type="text" id="number" name="number" required><br><br>
+        
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" ><br><br>
+        
+        <button type="submit">Submit</button>
+    </form>
+    <a href="/userdata">all data</a>
+
+    <% if (submittedData) { %>
+        <h2>Submitted Data:</h2>
+        <p>Username: <%= submittedData.username %></p>
+        <p>Number: <%= submittedData.number %></p>
+        <p>Date of Birth: <%= submittedData.dob %></p>
+    <% } %>
+</body>
+</html>
