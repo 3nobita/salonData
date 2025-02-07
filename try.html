@@ -1,0 +1,20 @@
+<label for="dob">Date of Birth:</label>
+<input type="text" id="dob" name="dob" placeholder="DD/MM/YYYY" required><br><br>
+
+<script>
+  document.getElementById('dob').addEventListener('input', function() {
+    let dobInput = document.getElementById('dob');
+    let value = dobInput.value;
+    value = value.replace(/\D/g, '');
+    if (value.length > 8) {
+      value = value.slice(0, 8);
+    }
+    if (value.length > 2) {
+      value = value.slice(0, 2) + '/' + value.slice(2); // Add slash after the day
+    }
+    if (value.length > 5) {
+      value = value.slice(0, 5) + '/' + value.slice(5); // Add slash after the month
+    }
+    dobInput.value = value;
+  });
+</script>

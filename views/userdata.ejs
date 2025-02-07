@@ -243,38 +243,64 @@
                         <h2>Add New User</h2>
                         <form action="/adduser" method="POST">
                             <label for="username">Name:</label>
-                            <input type="text" id="username" name="username" required><br><br>
+                            <input type="text" id="username" name="username"><br><br>
 
                             <label for="number">Number:</label>
-                            <input type="text" id="number" name="number" required><br><br>
+                            <input type="number" id="number" name="number" maxlength="10" required><br><br>
 
                             <label for="dob">Date of Birth:</label>
-                            <input type="date" id="dob" name="dob" required><br><br>
+                            <input type="text" id="dob" name="dob" placeholder="DD/MM/YYYY" required><br><br>
+
+                            <!-- <label for="visiting">Visit:</label>
+                            <input type="date" id="visiting" name="visiting" required><br><br> -->
 
                             <button type="submit">Submit</button>
                         </form>
+
                     </div>
                 </div>
 
                 <script>
-                    // Handle the "Edit" button click
+                    document.getElementById('number').addEventListener('input', function (e) {
+                        let inputValue = e.target.value;
+                        if (inputValue.length > 10) {
+                            e.target.value = inputValue.slice(0, 10);
+                        }
+                    });
+                     
+                    document.getElementById('dob').addEventListener('input', function() {
+                        let dobInput = document.getElementById('dob');
+                        let value = dobInput.value;
+                        value = value.replace(/\D/g, '');
+                        if (value.length > 8) {
+                          value = value.slice(0, 8);
+                        }
+                        if (value.length > 2) {
+                          value = value.slice(0, 2) + '/' + value.slice(2); // Add slash after the day
+                        }
+                        if (value.length > 5) {
+                          value = value.slice(0, 5) + '/' + value.slice(5); // Add slash after the month
+                        }
+                        dobInput.value = value;
+                      });
+
                     $('.edit-btn').click(function () {
                         const userId = $(this).data('id');
                         const row = $('#user-' + userId);
                         row.find('.username').html('<input type="text" value="' + row.find('.username').text() + '" />');
                         row.find('.number').html('<input type="text" value="' + row.find('.number').text() + '" />');
                         row.find('.dob').html('<input type="date" value="' + row.find('.dob').text() + '" />');
+                        row.find('.visiting').html('<input type="date" value="' + row.find('.visiting').text() + '" />');
                         row.find('.edit-btn').hide();
                         row.find('.save-btn').show();
                     });
-
-                    // Handle the "Save" button click (AJAX request to update the user)
                     $('.save-btn').click(function () {
                         const userId = $(this).data('id');
                         const row = $('#user-' + userId);
                         const updatedUsername = row.find('.username input').val();
                         const updatedNumber = row.find('.number input').val();
                         const updatedDob = row.find('.dob input').val();
+                        const updatedvisit = row.find('.visiting input').val();
 
                         // Send the updated data via AJAX to the server
                         $.ajax({
@@ -283,13 +309,15 @@
                             data: {
                                 username: updatedUsername,
                                 number: updatedNumber,
-                                dob: updatedDob
+                                dob: updatedDob,
+                                visiting: updatedvisit
                             },
                             success: function (response) {
                                 // On success, update the table row with the new data
                                 row.find('.username').text(updatedUsername);
                                 row.find('.number').text(updatedNumber);
                                 row.find('.dob').text(updatedDob);
+                                row.find('.visiting').text(updatedvisit);
                                 row.find('.edit-btn').show();
                                 row.find('.save-btn').hide();
                             },
