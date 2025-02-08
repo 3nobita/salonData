@@ -49,9 +49,9 @@
                 <tr>
                     <th>Name</th>
                     <th>Number</th>
-                    <th>Office</th>
-                    <th>Age</th>
                     <th>Birthday</th>
+                    <th>Profession</th>
+                    <th>Age</th>
                     <th>Salary</th>
                     <th>Actions</th>
                 </tr>
@@ -66,13 +66,13 @@
                             <%= user.number %>
                         </td>
                         <td class="dob">
-                            <!-- Display DOB in the table -->
+                            <%= user.dob %>  <!-- Display DOB in the table -->
                         </td>
                         <td>
                             <%= user.age %> <!-- Age field -->
                         </td>
                         <td>
-                            <%= user.dob %> <!-- DOB field, used in the table -->
+                            <!-- DOB field, used in the table -->
                         </td>
                         <td>
                             <%= user.salary %> <!-- Salary field -->
@@ -81,9 +81,9 @@
                             <button class="edit-btn" data-id="<%= user.id %>">Edit</button>
                             <button class="save-btn" data-id="<%= user.id %>" style="display:none;">Save</button>
                             <button class="cancel-btn" data-id="<%= user.id %>" style="display:none;">Cancel</button>
-                            <form action="/deleteuser/<%= user.id %>" method="POST" style="display:inline;">
+                            <!-- <form action="/deleteuser/<%= user.id %>" method="POST" style="display:inline;">
                                 <button type="submit" class="delete-btn">Delete</button>
-                            </form>
+                            </form> -->
                         </td>
 
                     </tr>
