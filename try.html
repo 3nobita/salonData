@@ -1,20 +1,223 @@
-<label for="dob">Date of Birth:</label>
-<input type="text" id="dob" name="dob" placeholder="DD/MM/YYYY" required><br><br>
+<!DOCTYPE html>
+<html lang="en">
 
-<script>
-  document.getElementById('dob').addEventListener('input', function() {
-    let dobInput = document.getElementById('dob');
-    let value = dobInput.value;
-    value = value.replace(/\D/g, '');
-    if (value.length > 8) {
-      value = value.slice(0, 8);
-    }
-    if (value.length > 2) {
-      value = value.slice(0, 2) + '/' + value.slice(2); // Add slash after the day
-    }
-    if (value.length > 5) {
-      value = value.slice(0, 5) + '/' + value.slice(5); // Add slash after the month
-    }
-    dobInput.value = value;
-  });
-</script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Data</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+</head>
+
+<body>
+    <!-- Header Section -->
+    <h1>All Users <button id="openModalBtn">Add New User</button></h1>
+
+    <!-- Search Bar with Suggestions -->
+    <div class="search-wrapper" style="text-align: center; margin-bottom: 20px;">
+        <input type="text" id="searchInput" placeholder="Search by Username or Number..."
+            style="padding: 10px; width: 300px; border-radius: 4px; border: 1px solid #ccc;">
+        <button onclick="searchUsers()"
+            style="padding: 10px 20px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer;">Search</button>
+        <button onclick="searchUsers()"
+            style="padding: 10px 20px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer;"><a href="/userdata"
+                style="text-decoration: none; color:#fff; ">Reload</a></button>
+    </div>
+
+    <!-- Suggestions Dropdown -->
+    <div id="suggestions" style="width: 300px; margin-top: 10px; position: absolute; display: none; background-color: white; 
+                border: 1px solid #ccc; max-height: 150px; overflow-y: auto; z-index: 1000;">
+    </div>
+
+    <!-- Table Container -->
+    <div class="table-container">
+        <% if (users && users.length> 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Number</th>
+                        <th>Date of Birth</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+        
+            </table>
+            <% } else { %>
+                <p>No users found!</p>
+                <% } %>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination">
+        <button onclick="loadPage('prev')" style="padding: 10px 20px; cursor: pointer;">Previous</button>
+        <button onclick="loadPage('next')" style="padding: 10px 20px; cursor: pointer;">Next</button>
+    </div>
+
+    <br>
+    <a href="/">Go back to the form</a>
+
+    <!-- Modal for adding user -->
+    <div id="addUserModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New User</h2>
+            <form action="/adduser" method="POST">
+                <label for="username">Name:</label>
+                <input type="text" id="username" name="username"><br><br>
+
+                <label for="number">Number:</label>
+                <input type="number" id="number" name="number" maxlength="10" required><br><br>
+
+                <label for="dob">Date of Birth:</label>
+                <input type="text" id="dob" name="dob" placeholder="DD/MM/YYYY" required><br><br>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript for handling user interactions (same as before) -->
+
+    <script>
+        // Input event listeners for validations
+        document.getElementById('number').addEventListener('input', function (e) {
+            let inputValue = e.target.value;
+            if (inputValue.length > 10) {
+                e.target.value = inputValue.slice(0, 10);
+            }
+        });
+
+        document.getElementById('dob').addEventListener('input', function () {
+            let dobInput = document.getElementById('dob');
+            let value = dobInput.value;
+            value = value.replace(/\D/g, '');
+            if (value.length > 8) value = value.slice(0, 8);
+            if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
+            if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5);
+            dobInput.value = value;
+        });
+
+        // Edit and Save button functionality
+        $('.edit-btn').click(function () {
+            const userId = $(this).data('id');
+            const row = $('#user-' + userId);
+            row.find('.username').html('<input type="text" value="' + row.find('.username').text() + '" />');
+            row.find('.number').html('<input type="text" value="' + row.find('.number').text() + '" />');
+            row.find('.dob').html('<input type="date" value="' + row.find('.dob').text() + '" />');
+            row.find('.edit-btn').hide();
+            row.find('.save-btn').show();
+        });
+
+        $('.save-btn').click(function () {
+            const userId = $(this).data('id');
+            const row = $('#user-' + userId);
+            const updatedUsername = row.find('.username input').val();
+            const updatedNumber = row.find('.number input').val();
+            const updatedDob = row.find('.dob input').val();
+
+            $.ajax({
+                url: '/edituser/' + userId,
+                method: 'POST',
+                data: {
+                    username: updatedUsername,
+                    number: updatedNumber,
+                    dob: updatedDob
+                },
+                success: function () {
+                    row.find('.username').text(updatedUsername);
+                    row.find('.number').text(updatedNumber);
+                    row.find('.dob').text(updatedDob);
+                    row.find('.edit-btn').show();
+                    row.find('.save-btn').hide();
+                },
+                error: function () {
+                    alert('Error updating user.');
+                }
+            });
+        });
+
+        // Modal logic
+        var modal = document.getElementById("addUserModal");
+        var btn = document.getElementById("openModalBtn");
+        var span = document.getElementsByClassName("close")[0];
+
+        btn.onclick = function () { modal.style.display = "block"; }
+        span.onclick = function () { modal.style.display = "none"; }
+        window.onclick = function (event) { if (event.target == modal) { modal.style.display = "none"; } }
+
+        // Search Bar Functionality
+        $('#searchInput').on('input', function () {
+            const searchQuery = $(this).val().trim();
+
+            if (searchQuery) {
+                $.ajax({
+                    url: '/searchusers',
+                    method: 'GET',
+                    data: { query: searchQuery },
+                    success: function (response) {
+                        updateUserTable(response.users);
+                    },
+                    error: function () {
+                        console.error('Error fetching search suggestions.');
+                    }
+                });
+            } else {
+                loadPage();
+            }
+        });
+
+        // Update the user table
+        function updateUserTable(users) {
+            const tableBody = $('#userTableBody');
+            tableBody.empty();
+
+            if (users.length > 0) {
+                users.forEach(user => {
+                    const row = `
+                        <tr id="user-${user.id}">
+                            <td class="username">${user.username}</td>
+                            <td class="number">${user.number}</td>
+                            <td class="dob">${user.dob}</td>
+                            <td>
+                                <button class="edit-btn" data-id="${user.id}">Edit</button>
+                                <button class="save-btn" data-id="${user.id}" style="display:none;">Save</button>
+                                <form action="/deleteuser/${user.id}" method="POST" style="display:inline;">
+                                    <button type="submit" class="delete-btn">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.append(row);
+                });
+            } else {
+                tableBody.append('<tr><td colspan="4">No users found matching your search.</td></tr>');
+            }
+        }
+
+        // Pagination logic
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        function loadPage(direction) {
+            if (direction === 'next') currentPage++;
+            if (direction === 'prev' && currentPage > 1) currentPage--;
+
+            $.ajax({
+                url: '/getUsers',
+                method: 'GET',
+                data: { page: currentPage, limit: itemsPerPage },
+                success: function (response) {
+                    updateUserTable(response.users);
+                }
+            });
+        }
+
+        // Initial load
+        loadPage();
+    </script>
+
+</body>
+
+</html>
